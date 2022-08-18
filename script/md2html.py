@@ -1,13 +1,14 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import argparse
-import markdown
 import os.path
-import sys
 import re
+import sys
+
+import markdown
 
 from parse import capitalize_word_list, parse_doc_index, parse_doc_name, parse_source
-from render import adapt_str_req, adapt_unicode_opt, init_jinja_env
+from render import init_jinja_env
 
 def parse_options(args):
     parser = argparse.ArgumentParser()
@@ -46,16 +47,17 @@ def main(options):
     #      conversion to unicode for jinja2 rendering purposes. The template variable is a simple
     #      str, so its conversion to unicode is required and is performed on jinja2 template
     #      construction stage.
-    context, template = parse_source(open(options.input))
+    with open(options.input, encoding="utf-8") as f:
+        context, template = parse_source(f)
     context["inc_version"] = options.doc_version if options.doc_version is not None else 0
 
     auto_props = determine_auto_props(options.input)
     context.setdefault("index", auto_props["index"])
     context.setdefault("title", auto_props["title"])
-    context["ititle"] = u"[{0:04d}] {1:s}".format(context["index"], context["title"])
+    context["ititle"] = f"[{context['index']:04d}] {context['title']}"
 
     env = init_jinja_env(options.data_path)
-    md_rendered = env.from_string(adapt_unicode_opt(template)).render(context)
+    md_rendered = env.from_string(template).render(context)
 
     # For markdown extensions description see:
     # https://pythonhosted.org/Markdown/extensions/index.html
@@ -68,10 +70,7 @@ def main(options):
             'markdown.extensions.smarty',
         ])
 
-    ## @note Conversion to utf-8 stored in 8-bit string is required for the script to work with
-    #      both, terminal printing as well as file redirection.
-    #  @see https://stackoverflow.com/questions/4545661/unicodedecodeerror-when-redirecting-to-file
-    print adapt_str_req(env.get_template("html/base.html").render(context))
+    print(env.get_template("html/base.html").render(context))
 
     return 0
 
