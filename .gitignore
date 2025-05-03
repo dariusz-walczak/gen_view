@@ -2,3 +2,5 @@
 *.pyc
 /out
 /TAGS
+/int
+/out2
