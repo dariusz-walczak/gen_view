@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import os.path
 import sys
 
 from render import init_jinja_env
@@ -27,7 +28,7 @@ def main(options):
     with open(options.context, 'r', encoding="utf-8") as f:
         context = json.load(f)
 
-    env = init_jinja_env(options.data_path)
+    env = init_jinja_env(os.path.join(options.data_path, "html"))
     template = env.get_template(options.template)
     print(template.render(context))
 
