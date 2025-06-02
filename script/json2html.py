@@ -5,6 +5,8 @@ import json
 import os.path
 import sys
 
+import jinja2
+
 from render import init_jinja_env
 
 def parse_options(args):
@@ -28,8 +30,17 @@ def main(options):
     with open(options.context, 'r', encoding="utf-8") as f:
         context = json.load(f)
 
-    env = init_jinja_env(os.path.join(options.data_path, "html"))
-    template = env.get_template(options.template)
+    html_template_path = os.path.join(options.data_path, "html")
+
+    env = init_jinja_env(html_template_path)
+    try:
+        template = env.get_template(options.template)
+    except jinja2.exceptions.TemplateNotFound as e:
+        print(
+            f"ERROR: The '{options.template}' template not found under the '{html_template_path}'"
+            " path", file=sys.stderr)
+        return 1;
+
     print(template.render(context))
 
     return 0
