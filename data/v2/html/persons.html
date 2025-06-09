@@ -1,0 +1,37 @@
+{% extends "base2.html" %}
+
+{% block head_extra %}
+<link type="text/css" rel="stylesheet" media="all" href="{{config.path.base}}/css/persons.css"/>
+{% endblock %}
+
+{% import "relative.html" as relative %}
+
+{% block content %}
+<header>
+  <h1>Genealogy Index</h1>
+  <nav>
+    <ul>
+      <li><a href="#Doe">Doe</a></li>
+      <li><a href="#Johnson">Johnson</a></li>
+      <li><a href="#Smith">Smith</a></li>
+      <li><a href="#Williams">Williams</a></li>
+    </ul>
+  </nav>
+</header>
+
+{% for group in by_last_name.grouped %}
+<section id="{{group.id}}" class="last-name-section">
+  <h2>{{group.family_name}}</h2>
+  {% for person in group.persons %}
+  <ul class="person-list">
+    <li class="person-item">
+      {% if person.gender == "female" %}♀{% else %}♂{% endif %}
+      <a href="persons/{{person.id}}.html">{{person.name.full}}</a>
+      <span class="years">(1950–2020)</span>
+    </li>
+  </ul>
+  {% endfor %}
+  <div class="back-to-top"><a href="#top">Back to Top</a></div>
+</section>
+{% endfor %}
+{% endblock %}

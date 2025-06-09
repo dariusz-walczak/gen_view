@@ -1,0 +1,85 @@
+header
+{
+  border-bottom: 2px solid #71A992;
+  padding-bottom: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+header nav ul
+{
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+header nav a
+{
+  text-decoration: none;
+  color: #0066cc;
+}
+
+header nav a:hover
+{
+  text-decoration: underline;
+}
+
+section.last-name-section
+{
+  margin-bottom: 3rem;
+}
+
+section.last-name-section h2
+{
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.person-list
+{
+  list-style: none;
+  padding: 0;
+}
+
+.person-item
+{
+  margin-bottom: 0.75rem;
+}
+
+.person-item a
+{
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+}
+
+.person-item a:hover
+{
+  text-decoration: underline;
+}
+
+.person-item span.years
+{
+  font-weight: normal;
+  color: #666;
+  margin-left: 0.5rem;
+}
+
+/* Optional: Add a "Back to Top" link */
+.back-to-top
+{
+  font-size: 0.9rem;
+  text-align: right;
+  margin-top: 0.5rem;
+}
+
+.back-to-top a {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+.back-to-top a:hover {
+  text-decoration: underline;
+}
