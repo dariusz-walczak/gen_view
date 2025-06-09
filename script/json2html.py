@@ -12,6 +12,9 @@ from render import init_jinja_env
 def parse_options(args):
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "-b", "--base-path", action="store", metavar="PATH", dest="base_path", default=".",
+        help="The output document tree base PATH")
+    parser.add_argument(
         "-d", "--data-path", action="store", metavar="PATH", dest="data_path",
         help="PATH to the directory containing jinja templates")
     parser.add_argument(
@@ -29,6 +32,8 @@ def parse_options(args):
 def main(options):
     with open(options.context, 'r', encoding="utf-8") as f:
         context = json.load(f)
+
+    context.setdefault("config", {}).setdefault("path", {})["base"] = options.base_path
 
     html_template_path = os.path.join(options.data_path, "html")
 
