@@ -1,0 +1,16 @@
+{% macro person(person) %}
+<a href="{{person.id}}.html">
+  {% if person.name is defined %}
+  {{person.name.full}}
+  {% else %}
+  NN
+  {% endif %}
+</a>
+{% if person.birth_date is defined and person.death_date is defined %}
+({{person.birth_date | year }}&ndash;{{person.death_date | year }})
+{% elif person.birth_date is defined %}
+(b. {{person.birth_date | year }})
+{% elif person.death_date is defined %}
+(d. {{person.death_date | year }})
+{% endif %}
+{% endmacro %}

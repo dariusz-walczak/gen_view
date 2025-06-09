@@ -1,0 +1,48 @@
+body
+{
+    font-family: sans-serif;
+    max-width: 900px;
+    margin: auto;
+    padding: 1rem;
+    background-color: #E6EFF4;
+    /*line-height: 1.5;*/
+}
+
+.profile
+{
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.profile img
+{
+    width: 150px;
+    height: auto;
+    border-radius: 8px;
+}
+
+.profile-details
+{
+    flex: 1;
+}
+
+.section
+{
+    margin-bottom: 2rem;
+}
+
+.section h2
+{
+    border-bottom: 1px solid #71A992; padding-bottom: .5rem;
+}
+
+.family-tree ul
+{
+    list-style-type: none;
+}
+
+.documents li
+{
+    margin-bottom: .5rem;
+}

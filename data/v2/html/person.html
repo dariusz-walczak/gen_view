@@ -1,0 +1,62 @@
+{% extends "base2.html" %}
+
+{% import "relative.html" as relative %}
+
+{% block content %}
+<header class="profile">
+  {% if photo is defined %}
+  <img src="johndoe.jpg" alt="John Doe">
+  {% endif %}
+  <div class="profile-details">
+    <h1>
+      {% if name is defined %}
+      {{name.full}}
+      {% else %}
+      NN
+      {% endif %}
+    </h1>
+    {% if birth_date is defined %}
+    <p title="Date of Birth">* <strong>{{birth_date}}</strong></p>
+    {% endif %}
+    {% if death_date is defined %}
+    <p title="Date of Death">† <strong>{{death_date}}</strong></p>
+    {% endif %}
+    <!-- <p>Occupation: <strong>Farmer</strong></p> -->
+    <!-- <p>Location: <strong>Springfield, USA</strong></p> -->
+  </div>
+</header>
+
+<section class="section family-tree">
+  <h2>Family Relations</h2>
+  <ul>
+    {% if father is defined %}
+    <li>Father: {{ relative.person(father) }}</li>
+    {% endif %}
+    {% if mother is defined %}
+    <li>Mother: {{ relative.person(mother) }}</li>
+    {% endif %}
+    {% for partner in partners %}
+    <li>Partner: {{ relative.person(partner) }}</li>
+    {% if partner.children is defined %}
+    <li>
+      <ul>
+        <li>Children:</li>
+        {% for child in partner.children %}
+        <li>{{ relative.person(child) }}</li>
+        {% endfor %}
+      </ul>
+    </li>
+    {% endif %}
+    {% endfor %}
+    {% if children is defined %}
+    <li>Children of Unknown Partner(s):
+      <ul>
+        {% for child in children %}
+        <li>{{ relative.person(child) }}</li>
+        {% endfor %}
+      </ul>
+    </li>
+    {% endif %}
+  </ul>
+</section>
+{% endblock %}
