@@ -1,0 +1,158 @@
+# -*- mode: makefile-gmake -*-
+
+include script/mak/commands.mak
+
+## === Parameters ============================================================================== ##
+
+PATH_OUT = ./out/v2
+PATH_SRC = ./src
+PATH_INT = ./int
+PATH_DATA = ./data/v2
+
+## === Commands ================================================================================ ##
+
+ifndef PATH_GEN_SANDBOX
+    $(error The 'PATH_GEN_SANDBOX' environment variable specifying the path to the local clone \
+        the 'https://github.com/dariusz-walczak/gen_sandbox' repository is not set)
+endif
+
+GEN_PERSON ?= $(PATH_GEN_SANDBOX)/code/person/gen_person
+
+ifeq ($(wildcard $(GEN_PERSON)),)
+    $(error The '$(GEN_PERSON)' application is missing. Build it within the '$(PATH_GEN_SANDBOX)' \
+        repository or override the path using the 'GEN_PERSON' variable)
+endif
+
+ADAPT_PERSON_LIST ?= script/adapt_person_list.py
+
+## === Interface Rules ========================================================================= ##
+
+.PHONY: \
+	all \
+		all_html \
+			all_list_html \
+			all_person_html \
+		all_static_data \
+	clean \
+		clean_list_all \
+		clean_person_all \
+		clean_static_data
+
+all: all_html all_static_data
+all_html: all_list_html all_person_html
+
+clean: clean_list_all clean_person_all clean_static_data
+
+## === Resource Build Rules ==================================================================== ##
+
+## --- Lists Build Rules ----------------------------------------------------------------------- ##
+
+PERSON_LIST_STAGE1_JSON_FILE := $(PATH_INT)/persons.1.json
+PERSON_LIST_STAGE2_JSON_FILE := $(PATH_INT)/persons.2.json
+PERSON_LIST_HTML_FILE := $(PATH_OUT)/persons.html
+
+PERSON_LIST_JSON_DIRS := \
+	$(sort $(dir $(PERSON_LIST_STAGE1_JSON_FILE) $(PERSON_LIST_STAGE2_JSON_FILE)))
+PERSON_LIST_HTML_DIR := $(dir $(PERSON_LIST_HTML_FILE))
+
+$(PERSON_LIST_STAGE1_JSON_FILE): $(PERSON_TURTLE_FILES) $(PERSON_LIST_JSON_DIRS)
+	$(GEN_PERSON) --base-path $(PATH_SRC) list > $@
+
+$(PERSON_LIST_STAGE2_JSON_FILE): $(PERSON_LIST_STAGE1_JSON_FILE) $(PERSON_LIST_JSON_DIRS)
+	$(ADAPT_PERSON_LIST) $(PERSON_LIST_STAGE1_JSON_FILE) > $@
+
+$(PERSON_LIST_HTML_FILE): $(PERSON_LIST_STAGE2_JSON_FILE) $(PERSON_LIST_HTML_DIR)
+	$(JSON2HTML) --base-path=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_INT)) -d $(PATH_DATA) $< persons.html > $@
+
+all_list_html: $(PERSON_LIST_HTML_FILE)
+
+clean_list_all:
+	$(RM) \
+		$(PERSON_LIST_HTML_FILE) \
+		$(PERSON_LIST_STAGE1_JSON_FILE) \
+		$(PERSON_LIST_STAGE2_JSON_FILE)
+
+.PHONY: diag_list_all
+diag_list_all:
+	@$(ECHO) "${BYellow}diag_list_all${col_off}:"
+	@$(ECHO) "    ${col_var_name}PERSON_LIST_STAGE1_JSON_FILE${col_off}:"\
+		"${col_var_val}$(PERSON_LIST_STAGE1_JSON_FILE)${col_off}"
+	@$(ECHO) "    ${col_var_name}PERSON_LIST_STAGE2_JSON_FILE${col_off}:"\
+		"${col_var_val}$(PERSON_LIST_STAGE2_JSON_FILE)${col_off}"
+	@$(ECHO) "    ${col_var_name}PERSON_LIST_HTML_FILE${col_off}:       "\
+		"${col_var_val}$(PERSON_LIST_HTML_FILE)${col_off}"
+	@$(ECHO) "    ${col_var_name}PERSON_LIST_JSON_DIRS${col_off}:       "\
+		"${col_var_val}$(PERSON_LIST_JSON_DIRS)${col_off}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ##
+
+PERSON_TURTLE_FILES := $(shell $(FIND) $(PATH_SRC) -type f -a -name '*.ttl')
+PERSON_JSON_FILES := $(patsubst $(PATH_SRC)/%.ttl,$(PATH_INT)/persons/%.json,$(PERSON_TURTLE_FILES))
+PERSON_HTML_FILES := $(patsubst $(PATH_INT)/persons/%.json,$(PATH_OUT)/persons/%.html,$(PERSON_JSON_FILES))
+PERSON_JSON_DIRS := $(sort $(dir $(PERSON_JSON_FILES)))
+PERSON_HTML_DIRS := $(sort $(dir $(PERSON_HTML_FILES)))
+
+$(PERSON_HTML_FILES): $(PATH_OUT)/persons/%.html: $(PATH_INT)/persons/%.json | $(PERSON_HTML_DIRS)
+	$(JSON2HTML) --base-path=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_INT)) -d $(PATH_DATA) $< person.html > $@
+
+$(PERSON_JSON_FILES): $(PATH_INT)/persons/%.json: $(PATH_SRC)/%.ttl | $(PERSON_JSON_DIRS)
+	$(GEN_PERSON) --base-path $(PATH_SRC) details --person $(basename $(notdir $<)) > $@
+
+all_person_html: $(PERSON_HTML_FILES)
+clean_person_all:
+	$(RM) \
+		$(PERSON_HTML_FILES) \
+		$(PERSON_JSON_FILES)
+
+.PHONY: diag_person_all
+diag_person_all:
+	@$(ECHO) "${BYellow}diag_person_all${col_off}:"
+	@$(ECHO) "    ${col_var_name}PERSON_TURTLE_FILES${col_off}:"\
+		"${col_var_val}$(PERSON_TURTLE_FILES)${col_off}"
+	@$(ECHO) "    ${col_var_name}PERSON_JSON_FILES${col_off}:  "\
+		"${col_var_val}$(PERSON_JSON_FILES)${col_off}"
+	@$(ECHO) "    ${col_var_name}PERSON_JSON_DIRS${col_off}:   "\
+		"${col_var_val}$(PERSON_JSON_DIRS)${col_off}"
+	@$(ECHO) "    ${col_var_name}PERSON_HTML_FILES${col_off}:  "\
+		"${col_var_val}$(PERSON_HTML_FILES)${col_off}"
+	@$(ECHO) "    ${col_var_name}PERSON_HTML_DIRS${col_off}:   "\
+		"${col_var_val}$(PERSON_HTML_DIRS)${col_off}"
+
+## --- Static Data Files ----------------------------------------------------------------------- ##
+
+STATIC_DATA_SRC_PATH := $(PATH_DATA)/html
+STATIC_DATA_SRC_FILES := $(shell \
+	$(FIND) $(STATIC_DATA_SRC_PATH) -type f -a '(' -name '*.png' -o -name '*.css' ')')
+STATIC_DATA_OUT_FILES := $(patsubst $(STATIC_DATA_SRC_PATH)%,$(PATH_OUT)%,$(STATIC_DATA_SRC_FILES))
+STATIC_DATA_OUT_DIRS := $(sort $(dir $(STATIC_DATA_OUT_FILES)))
+
+$(STATIC_DATA_OUT_FILES): $(PATH_OUT)/%: $(STATIC_DATA_SRC_PATH)/% | $(STATIC_DATA_OUT_DIRS)
+	$(CP) -f $< $@
+	$(CHMOD) 444 $@
+
+all_static_data: $(STATIC_DATA_OUT_FILES)
+clean_static_data:
+	$(RM) $(STATIC_DATA_OUT_FILES)
+.PHONY: diag_static_data
+diag_static_data:
+	@$(ECHO) "${BYellow}diag_static_data${col_off}:"
+	@$(ECHO) "    ${col_var_name}STATIC_DATA_SRC_PATH${col_off}: "\
+		"${col_var_val}$(STATIC_DATA_SRC_PATH)${col_off}"
+	@$(ECHO) "    ${col_var_name}STATIC_DATA_SRC_FILES${col_off}:"\
+		"${col_var_val}$(STATIC_DATA_SRC_FILES)${col_off}"
+	@$(ECHO) "    ${col_var_name}STATIC_DATA_OUT_FILES${col_off}:"\
+		"${col_var_val}$(STATIC_DATA_OUT_FILES)${col_off}"
+	@$(ECHO) "    ${col_var_name}STATIC_DATA_OUT_DIRS${col_off}: "\
+		"${col_var_val}$(STATIC_DATA_OUT_DIRS)${col_off}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ##
+
+ALL_DIRS = $(sort \
+	$(PERSON_HTML_DIRS) \
+	$(PERSON_JSON_DIRS) \
+	$(PERSON_LIST_HTML_DIR) \
+	$(PERSON_LIST_JSON_DIRS) \
+	$(STATIC_DATA_OUT_DIRS))
+
+$(ALL_DIRS): %:
+	$(MKDIR) -p $@
