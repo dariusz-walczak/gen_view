@@ -27,7 +27,11 @@
     <li class="person-item">
       {% if person.gender == "female" %}♀{% else %}♂{% endif %}
       <a href="persons/{{person.id}}.html">{{person.name.full}}</a>
-      <span class="years">(1950–2020)</span>
+      {% if 'birth_year' in person or 'death_year' in person %}
+      <span class="years">
+        ({% if 'birth_year' in person %}{{person.birth_year}}{% endif %}–{% if 'death_year' in person %}{{person.death_year}}{% endif %})
+      </span>
+      {% endif %}
     </li>
   </ul>
   {% endfor %}
