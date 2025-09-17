@@ -32,13 +32,19 @@ ADAPT_PERSON_LIST ?= script/adapt_person_list.py
 		all_html \
 			all_list_html \
 			all_person_html \
+		all_int \
+			all_person_int \
 		all_static_data \
 	clean \
 		clean_list_all \
 		clean_person_all \
-		clean_static_data
+		clean_static_data \
+	diag_list_all \
+	diag_person_all \
+	diag_static_data
 
 all: all_html all_static_data
+all_int: all_person_int
 all_html: all_list_html all_person_html
 
 clean: clean_list_all clean_person_all clean_static_data
@@ -56,13 +62,18 @@ PERSON_LIST_JSON_DIRS := \
 PERSON_LIST_HTML_DIR := $(dir $(PERSON_LIST_HTML_FILE))
 
 $(PERSON_LIST_STAGE1_JSON_FILE): $(PERSON_TURTLE_FILES) $(PERSON_LIST_JSON_DIRS)
-	$(GEN_PERSON) --base-path $(PATH_SRC) list > $@
+	$(GEN_PERSON) --log-level=off --src-root-path=$(PATH_SRC) list > $@
 
 $(PERSON_LIST_STAGE2_JSON_FILE): $(PERSON_LIST_STAGE1_JSON_FILE) $(PERSON_LIST_JSON_DIRS)
 	$(ADAPT_PERSON_LIST) $(PERSON_LIST_STAGE1_JSON_FILE) > $@
 
+all_list_int: $(PERSON_LIST_STAGE1_JSON_FILE) $(PERSON_LIST_STAGE2_JSON_FILE)
+
 $(PERSON_LIST_HTML_FILE): $(PERSON_LIST_STAGE2_JSON_FILE) $(PERSON_LIST_HTML_DIR)
-	$(JSON2HTML) --base-path=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_INT)) -d $(PATH_DATA) $< persons.html > $@
+	$(JSON2HTML) \
+		--base-dir=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_INT)) \
+		--res-dir=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_PERSON_INT)) \
+		--data-dir=$(PATH_DATA) $< persons.html > $@
 
 all_list_html: $(PERSON_LIST_HTML_FILE)
 
@@ -72,7 +83,6 @@ clean_list_all:
 		$(PERSON_LIST_STAGE1_JSON_FILE) \
 		$(PERSON_LIST_STAGE2_JSON_FILE)
 
-.PHONY: diag_list_all
 diag_list_all:
 	@$(ECHO) "${BYellow}diag_list_all${col_off}:"
 	@$(ECHO) "    ${col_var_name}PERSON_LIST_STAGE1_JSON_FILE${col_off}:"\
@@ -84,39 +94,72 @@ diag_list_all:
 	@$(ECHO) "    ${col_var_name}PERSON_LIST_JSON_DIRS${col_off}:       "\
 		"${col_var_val}$(PERSON_LIST_JSON_DIRS)${col_off}"
 
-## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ##
+## --- Details Build Rules --------------------------------------------------------------------- ##
 
-PERSON_TURTLE_FILES := $(shell $(FIND) $(PATH_SRC) -type f -a -name '*.ttl')
-PERSON_JSON_FILES := $(patsubst $(PATH_SRC)/%.ttl,$(PATH_INT)/persons/%.json,$(PERSON_TURTLE_FILES))
-PERSON_HTML_FILES := $(patsubst $(PATH_INT)/persons/%.json,$(PATH_OUT)/persons/%.html,$(PERSON_JSON_FILES))
+PATH_PERSON_SRC := $(PATH_SRC)
+PATH_PERSON_INT := $(PATH_INT)/person
+PATH_PERSON_OUT := $(PATH_OUT)/person
+
+PERSON_JSON_FILES := $(sort $(shell \
+	$(GEN_PERSON) --log-level=off --src-root-path=$(PATH_PERSON_SRC) \
+		targets --json --tgt-root=$(PATH_PERSON_INT)))
+
+PERSON_DEPS_FILES := $(patsubst $(PATH_PERSON_INT)/%.json,$(PATH_PERSON_INT)/%.deps,$(PERSON_JSON_FILES))
+PERSON_HTML_FILES := $(patsubst $(PATH_PERSON_INT)/%.json,$(PATH_PERSON_OUT)/%.html,$(PERSON_JSON_FILES))
+
 PERSON_JSON_DIRS := $(sort $(dir $(PERSON_JSON_FILES)))
+PERSON_DEPS_DIRS := $(sort $(dir $(PERSON_DEPS_FILES)))
 PERSON_HTML_DIRS := $(sort $(dir $(PERSON_HTML_FILES)))
 
-$(PERSON_HTML_FILES): $(PATH_OUT)/persons/%.html: $(PATH_INT)/persons/%.json | $(PERSON_HTML_DIRS)
-	$(JSON2HTML) --base-path=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_INT)) -d $(PATH_DATA) $< person.html > $@
+$(PERSON_DEPS_FILES): | $(PERSON_DEPS_DIRS)
+$(PERSON_JSON_FILES): | $(PERSON_JSON_DIRS)
+$(PERSON_HTML_FILES): | $(PERSON_HTML_DIRS)
 
-$(PERSON_JSON_FILES): $(PATH_INT)/persons/%.json: $(PATH_SRC)/%.ttl | $(PERSON_JSON_DIRS)
-	$(GEN_PERSON) --base-path $(PATH_SRC) details --person $(basename $(notdir $<)) > $@
+
+$(PATH_PERSON_INT)/%.deps:
+	$(GEN_PERSON) --log-level=off --src-root-path=$(PATH_PERSON_SRC) deps \
+		--tgt-root=$(PATH_PERSON_INT) --meta-target=all_person_int --person="http://$*" > $@
+
+$(PATH_PERSON_INT)/%.json: PERSON_SOURCE_FILES = $(filter %.ttl,$^)
+$(PATH_PERSON_INT)/%.json:
+	$(GEN_PERSON) --log-level=off $(addprefix --input=, $(PERSON_SOURCE_FILES)) details --person="http://$*" > $@
+
+$(PATH_PERSON_OUT)/%.html: $(PATH_PERSON_INT)/%.json
+	$(JSON2HTML) \
+		--base-dir=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_INT)) \
+		--res-dir=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_PERSON_INT)) \
+		--data-dir=$(PATH_DATA) $< person.html > $@
 
 all_person_html: $(PERSON_HTML_FILES)
-clean_person_all:
-	$(RM) \
-		$(PERSON_HTML_FILES) \
-		$(PERSON_JSON_FILES)
 
-.PHONY: diag_person_all
+-include $(PERSON_DEPS_FILES)
+
 diag_person_all:
 	@$(ECHO) "${BYellow}diag_person_all${col_off}:"
-	@$(ECHO) "    ${col_var_name}PERSON_TURTLE_FILES${col_off}:"\
-		"${col_var_val}$(PERSON_TURTLE_FILES)${col_off}"
-	@$(ECHO) "    ${col_var_name}PERSON_JSON_FILES${col_off}:  "\
-		"${col_var_val}$(PERSON_JSON_FILES)${col_off}"
-	@$(ECHO) "    ${col_var_name}PERSON_JSON_DIRS${col_off}:   "\
-		"${col_var_val}$(PERSON_JSON_DIRS)${col_off}"
-	@$(ECHO) "    ${col_var_name}PERSON_HTML_FILES${col_off}:  "\
-		"${col_var_val}$(PERSON_HTML_FILES)${col_off}"
-	@$(ECHO) "    ${col_var_name}PERSON_HTML_DIRS${col_off}:   "\
-		"${col_var_val}$(PERSON_HTML_DIRS)${col_off}"
+	@$(ECHO) "    ${col_var_name}PATH_PERSON_SRC${col_off}:   "\
+		"${col_var_val}$(PATH_PERSON_SRC)${col_off}"
+	@$(ECHO) "    ${col_var_name}PATH_PERSON_INT${col_off}:   "\
+		"${col_var_val}$(PATH_PERSON_INT)${col_off}"
+	@$(ECHO) "    ${col_var_name}PATH_PERSON_OUT${col_off}:   "\
+		"${col_var_val}$(PATH_PERSON_OUT)${col_off}"
+	@$(ECHO) "    ${col_var_name}PERSON_JSON_FILES${col_off}:"
+	@$(PRINTF) "        ${col_var_val}%s${col_off}\n" $(PERSON_JSON_FILES)
+	@$(ECHO) "    ${col_var_name}PERSON_DEPS_FILES${col_off}:"
+	@$(PRINTF) "        ${col_var_val}%s${col_off}\n" $(PERSON_DEPS_FILES)
+	@$(ECHO) "    ${col_var_name}PERSON_HTML_FILES${col_off}:"
+	@$(PRINTF) "        ${col_var_val}%s${col_off}\n" $(PERSON_HTML_FILES)
+	@$(ECHO) "    ${col_var_name}PERSON_JSON_DIRS${col_off}:"
+	@$(PRINTF) "        ${col_var_val}%s${col_off}\n" $(PERSON_JSON_DIRS)
+	@$(ECHO) "    ${col_var_name}PERSON_DEPS_DIRS${col_off}:"
+	@$(PRINTF) "        ${col_var_val}%s${col_off}\n" $(PERSON_DEPS_DIRS)
+	@$(ECHO) "    ${col_var_name}PERSON_HTML_DIRS${col_off}:"
+	@$(PRINTF) "        ${col_var_val}%s${col_off}\n" $(PERSON_HTML_DIRS)
+
+clean_person_all:
+	$(RM) $(PERSON_DEPS_FILES)
+	$(RM) $(PERSON_JSON_FILES)
+	$(RM) $(PERSON_HTML_FILES)
+
 
 ## --- Static Data Files ----------------------------------------------------------------------- ##
 
@@ -133,7 +176,7 @@ $(STATIC_DATA_OUT_FILES): $(PATH_OUT)/%: $(STATIC_DATA_SRC_PATH)/% | $(STATIC_DA
 all_static_data: $(STATIC_DATA_OUT_FILES)
 clean_static_data:
 	$(RM) $(STATIC_DATA_OUT_FILES)
-.PHONY: diag_static_data
+
 diag_static_data:
 	@$(ECHO) "${BYellow}diag_static_data${col_off}:"
 	@$(ECHO) "    ${col_var_name}STATIC_DATA_SRC_PATH${col_off}: "\
@@ -150,6 +193,7 @@ diag_static_data:
 ALL_DIRS = $(sort \
 	$(PERSON_HTML_DIRS) \
 	$(PERSON_JSON_DIRS) \
+	$(PERSON_DEPS_DIRS) \
 	$(PERSON_LIST_HTML_DIR) \
 	$(PERSON_LIST_JSON_DIRS) \
 	$(STATIC_DATA_OUT_DIRS))

@@ -1,5 +1,5 @@
-{% macro person(person) %}
-<a href="{{person.id}}.html">
+{% macro person(config, person) %}
+<a href="{{config.path.res}}/{{person.unique_path}}.html">
   {% if person.name is defined %}
   {{person.name.full}}
   {% else %}

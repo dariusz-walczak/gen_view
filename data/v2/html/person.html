@@ -30,19 +30,19 @@
   <h2>Family Relations</h2>
   <ul>
     {% if father is defined %}
-    <li>Father: {{ relative.person(father) }}</li>
+    <li>Father: {{ relative.person(config, father) }}</li>
     {% endif %}
     {% if mother is defined %}
-    <li>Mother: {{ relative.person(mother) }}</li>
+    <li>Mother: {{ relative.person(config, mother) }}</li>
     {% endif %}
     {% for partner in partners %}
-    <li>Partner: {{ relative.person(partner) }}</li>
+    <li>Partner: {{ relative.person(config, partner) }}</li>
     {% if partner.children is defined %}
     <li>
       <ul>
         <li>Children:</li>
         {% for child in partner.children %}
-        <li>{{ relative.person(child) }}</li>
+        <li>{{ relative.person(config, child) }}</li>
         {% endfor %}
       </ul>
     </li>
@@ -52,7 +52,7 @@
     <li>Children of Unknown Partner(s):
       <ul>
         {% for child in children %}
-        <li>{{ relative.person(child) }}</li>
+        <li>{{ relative.person(config, child) }}</li>
         {% endfor %}
       </ul>
     </li>

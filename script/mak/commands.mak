@@ -7,6 +7,7 @@ FIND       ?= find
 GIT        ?= git
 LN         ?= ln
 MKDIR      ?= mkdir
+PRINTF     ?= printf
 REALPATH   ?= realpath
 RM         ?= rm
 XARGS      ?= xargs
