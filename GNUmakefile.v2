@@ -44,6 +44,9 @@ ADAPT_PERSON_LIST ?= script/adapt_person_list.py
 	diag_static_data
 
 all: all_html all_static_data
+	@$(PRINTF) "\n${col_yellow_bold}>>>${col_off} firefox ${col_var_val}file://%s${col_off}\n\n" \
+		$(shell $(READLINK) -f $(PERSON_LIST_HTML_FILE))
+
 all_int: all_person_int
 all_html: all_list_html all_person_html
 
@@ -84,7 +87,7 @@ clean_list_all:
 		$(PERSON_LIST_STAGE2_JSON_FILE)
 
 diag_list_all:
-	@$(ECHO) "${BYellow}diag_list_all${col_off}:"
+	@$(ECHO) "${col_yellow_bold}diag_list_all${col_off}:"
 	@$(ECHO) "    ${col_var_name}PERSON_LIST_STAGE1_JSON_FILE${col_off}:"\
 		"${col_var_val}$(PERSON_LIST_STAGE1_JSON_FILE)${col_off}"
 	@$(ECHO) "    ${col_var_name}PERSON_LIST_STAGE2_JSON_FILE${col_off}:"\
@@ -118,7 +121,8 @@ $(PERSON_HTML_FILES): | $(PERSON_HTML_DIRS)
 
 $(PATH_PERSON_INT)/%.deps:
 	$(GEN_PERSON) --log-level=off --src-root-path=$(PATH_PERSON_SRC) deps \
-		--tgt-root=$(PATH_PERSON_INT) --meta-target=all_person_int --person="http://$*" > $@
+		--tgt-root=$(PATH_PERSON_INT) --meta-target=all_person_int --person="http://$*" > $@.tmp
+	@if cmp --quiet $@ $@.tmp; then $(RM) -f $@.tmp; else mv $@.tmp $@; fi
 
 $(PATH_PERSON_INT)/%.json: PERSON_SOURCE_FILES = $(filter %.ttl,$^)
 $(PATH_PERSON_INT)/%.json:
@@ -135,7 +139,7 @@ all_person_html: $(PERSON_HTML_FILES)
 -include $(PERSON_DEPS_FILES)
 
 diag_person_all:
-	@$(ECHO) "${BYellow}diag_person_all${col_off}:"
+	@$(ECHO) "${col_yellow_bold}diag_person_all${col_off}:"
 	@$(ECHO) "    ${col_var_name}PATH_PERSON_SRC${col_off}:   "\
 		"${col_var_val}$(PATH_PERSON_SRC)${col_off}"
 	@$(ECHO) "    ${col_var_name}PATH_PERSON_INT${col_off}:   "\
@@ -178,7 +182,7 @@ clean_static_data:
 	$(RM) $(STATIC_DATA_OUT_FILES)
 
 diag_static_data:
-	@$(ECHO) "${BYellow}diag_static_data${col_off}:"
+	@$(ECHO) "${col_yellow_bold}diag_static_data${col_off}:"
 	@$(ECHO) "    ${col_var_name}STATIC_DATA_SRC_PATH${col_off}: "\
 		"${col_var_val}$(STATIC_DATA_SRC_PATH)${col_off}"
 	@$(ECHO) "    ${col_var_name}STATIC_DATA_SRC_FILES${col_off}:"\

@@ -8,6 +8,7 @@ GIT        ?= git
 LN         ?= ln
 MKDIR      ?= mkdir
 PRINTF     ?= printf
+READLINK   ?= readlink
 REALPATH   ?= realpath
 RM         ?= rm
 XARGS      ?= xargs
