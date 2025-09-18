@@ -65,10 +65,12 @@ PERSON_LIST_JSON_DIRS := \
 PERSON_LIST_HTML_DIR := $(dir $(PERSON_LIST_HTML_FILE))
 
 $(PERSON_LIST_STAGE1_JSON_FILE): $(PERSON_TURTLE_FILES) $(PERSON_LIST_JSON_DIRS)
-	$(GEN_PERSON) --log-level=off --src-root-path=$(PATH_SRC) list > $@
+	$(GEN_PERSON) --log-level=off --src-root-path=$(PATH_SRC) list > $@.tmp
+	$(MV) $@.tmp $@
 
 $(PERSON_LIST_STAGE2_JSON_FILE): $(PERSON_LIST_STAGE1_JSON_FILE) $(PERSON_LIST_JSON_DIRS)
-	$(ADAPT_PERSON_LIST) $(PERSON_LIST_STAGE1_JSON_FILE) > $@
+	$(ADAPT_PERSON_LIST) $(PERSON_LIST_STAGE1_JSON_FILE) > $@.tmp
+	$(MV) $@.tmp $@
 
 all_list_int: $(PERSON_LIST_STAGE1_JSON_FILE) $(PERSON_LIST_STAGE2_JSON_FILE)
 
@@ -76,7 +78,8 @@ $(PERSON_LIST_HTML_FILE): $(PERSON_LIST_STAGE2_JSON_FILE) $(PERSON_LIST_HTML_DIR
 	$(JSON2HTML) \
 		--base-dir=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_INT)) \
 		--res-dir=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_PERSON_INT)) \
-		--data-dir=$(PATH_DATA) $< persons.html > $@
+		--data-dir=$(PATH_DATA) $< persons.html > $@.tmp
+	$(MV) $@.tmp $@
 
 all_list_html: $(PERSON_LIST_HTML_FILE)
 
@@ -126,13 +129,16 @@ $(PATH_PERSON_INT)/%.deps:
 
 $(PATH_PERSON_INT)/%.json: PERSON_SOURCE_FILES = $(filter %.ttl,$^)
 $(PATH_PERSON_INT)/%.json:
-	$(GEN_PERSON) --log-level=off $(addprefix --input=, $(PERSON_SOURCE_FILES)) details --person="http://$*" > $@
+	$(GEN_PERSON) --log-level=off $(addprefix --input=, $(PERSON_SOURCE_FILES)) details \
+		--person="http://$*" > $@.tmp
+	$(MV) $@.tmp $@
 
 $(PATH_PERSON_OUT)/%.html: $(PATH_PERSON_INT)/%.json
 	$(JSON2HTML) \
 		--base-dir=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_INT)) \
 		--res-dir=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_PERSON_INT)) \
-		--data-dir=$(PATH_DATA) $< person.html > $@
+		--data-dir=$(PATH_DATA) $< person.html > $@.tmp
+	$(MV) $@.tmp $@
 
 all_person_html: $(PERSON_HTML_FILES)
 
