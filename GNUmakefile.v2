@@ -16,7 +16,7 @@ ifndef PATH_GEN_SANDBOX
         the 'https://github.com/dariusz-walczak/gen_sandbox' repository is not set)
 endif
 
-GEN_PERSON ?= $(PATH_GEN_SANDBOX)/code/person/gen_person
+GEN_PERSON ?= $(PATH_GEN_SANDBOX)/build/code/person/gen_person
 
 ifeq ($(wildcard $(GEN_PERSON)),)
     $(error The '$(GEN_PERSON)' application is missing. Build it within the '$(PATH_GEN_SANDBOX)' \
