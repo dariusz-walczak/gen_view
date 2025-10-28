@@ -1,0 +1,9 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Gen View 0.1\n"
+"Language: en\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "INFERRED_PARTNER"
+msgstr "%(partner)s is an inferred partner. Add a `gx:Relationship` resource of type `gx:Couple` to define the partners explicitly."

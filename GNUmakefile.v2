@@ -34,12 +34,14 @@ ADAPT_PERSON_LIST ?= script/adapt_person_list.py
 			all_person_html \
 		all_int \
 			all_person_int \
+        all_locale \
 		all_static_data \
 	clean \
 		clean_list_all \
 		clean_person_all \
 		clean_static_data \
 	diag_list_all \
+    diag_locale \
 	diag_person_all \
 	diag_root_dirs \
 	diag_static_data
@@ -51,7 +53,7 @@ all: all_html all_static_data
 all_int: all_person_int
 all_html: all_list_html all_person_html
 
-clean: clean_list_all clean_person_all clean_static_data
+clean: clean_list_all clean_locale clean_person_all clean_static_data
 
 ## === Resource Build Rules ==================================================================== ##
 
@@ -67,6 +69,41 @@ diag_root_dirs:
 		"${col_var_val}$(PATH_PERSON_INT)${col_off}"
 	@$(ECHO) "    ${col_var_name}PATH_PERSON_OUT${col_off}:"\
 		"${col_var_val}$(PATH_PERSON_OUT)${col_off}"
+
+## --- Locales Build Rules --------------------------------------------------------------------- ##
+
+PATH_LOCALE_SRC := $(PATH_DATA)/locales
+# PATH_INT is intentional locale output directory: the mo files are only needed to generate html
+#  files which are then put into the output directory
+PATH_LOCALE_OUT := $(PATH_INT)/locales
+LOCALE_SRC_FILES := $(shell $(FIND) $(PATH_LOCALE_SRC) -type f -a -name '*.po')
+LOCALE_INT_FILES :=  $(patsubst %.po,%.mo,$(LOCALE_SRC_FILES))
+LOCALE_OUT_FILES := $(patsubst $(PATH_LOCALE_SRC)%,$(PATH_LOCALE_OUT)%,$(LOCALE_INT_FILES))
+
+LOCALE_OUT_DIRS := $(sort $(dir $(LOCALE_OUT_FILES)))
+
+$(LOCALE_OUT_FILES): $(LOCALE_SRC_FILES) | $(LOCALE_OUT_DIRS)
+	$(PYBABEL) compile -d $(PATH_LOCALE_SRC)
+	$(MV) $(LOCALE_INT_FILES) $(LOCALE_OUT_FILES)
+
+all_locale: $(LOCALE_OUT_FILES)
+clean_locale:
+	$(RM) -fr $(LOCALE_OUT_DIRS) $(LOCALE_INT_FILES)
+
+diag_locale:
+	@$(ECHO) "${col_yellow_bold}diag_locale${col_off}:"
+	@$(ECHO) "    ${col_var_name}PATH_LOCALE_SRC${col_off}: "\
+		"${col_var_val}$(PATH_LOCALE_SRC)${col_off}"
+	@$(ECHO) "    ${col_var_name}PATH_LOCALE_OUT${col_off}:"\
+		"${col_var_val}$(PATH_LOCALE_OUT)${col_off}"
+	@$(ECHO) "    ${col_var_name}LOCALE_SRC_FILES${col_off}:"\
+		"${col_var_val}$(LOCALE_SRC_FILES)${col_off}"
+	@$(ECHO) "    ${col_var_name}LOCALE_INT_FILES${col_off}:"\
+		"${col_var_val}$(LOCALE_INT_FILES)${col_off}"
+	@$(ECHO) "    ${col_var_name}LOCALE_OUT_FILES${col_off}:"\
+		"${col_var_val}$(LOCALE_OUT_FILES)${col_off}"
+	@$(ECHO) "    ${col_var_name}LOCALE_OUT_DIRS${col_off}:"\
+		"${col_var_val}$(LOCALE_OUT_DIRS)${col_off}"
 
 ## --- Lists Build Rules ----------------------------------------------------------------------- ##
 
@@ -99,7 +136,8 @@ $(PERSON_LIST_STAGE2_JSON_FILE): $(PERSON_LIST_STAGE1_JSON_FILE) | $(PERSON_LIST
 
 all_list_int: $(PERSON_LIST_STAGE1_JSON_FILE) $(PERSON_LIST_STAGE2_JSON_FILE)
 
-$(PERSON_LIST_HTML_FILE): $(PERSON_LIST_STAGE2_JSON_FILE) | $(PERSON_LIST_HTML_DIR)
+$(PERSON_LIST_HTML_FILE): $(PERSON_LIST_STAGE2_JSON_FILE) $(LOCALE_OUT_FILES) \
+		| $(PERSON_LIST_HTML_DIR)
 	$(JSON2HTML) \
 		--base-dir=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_INT)) \
 		--res-dir=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_PERSON_INT)) \
@@ -156,7 +194,7 @@ $(PATH_PERSON_INT)/%.json:
 		--person="http://$*" > $@.tmp
 	$(MV) $@.tmp $@
 
-$(PATH_PERSON_OUT)/%.html: $(PATH_PERSON_INT)/%.json
+$(PATH_PERSON_OUT)/%.html: $(PATH_PERSON_INT)/%.json $(LOCALE_OUT_FILES)
 	$(JSON2HTML) \
 		--base-dir=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_INT)) \
 		--res-dir=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_PERSON_INT)) \
@@ -218,6 +256,7 @@ diag_static_data:
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ##
 
 ALL_DIRS = $(sort \
+	$(LOCALE_OUT_DIRS) \
 	$(PERSON_HTML_DIRS) \
 	$(PERSON_JSON_DIRS) \
 	$(PERSON_DEPS_DIRS) \

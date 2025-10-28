@@ -10,6 +10,7 @@ LN         ?= ln
 MKDIR      ?= mkdir
 MV         ?= mv
 PRINTF     ?= printf
+PYBABEL    ?= pybabel
 READLINK   ?= readlink
 REALPATH   ?= realpath
 RM         ?= rm
