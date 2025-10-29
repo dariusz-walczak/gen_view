@@ -7,3 +7,24 @@ msgstr ""
 
 msgid "INFERRED_PARTNER"
 msgstr "%(partner)s is an inferred partner. Add a `gx:Relationship` resource of type `gx:Couple` to define the partners explicitly."
+
+msgid "PERSON-DETAILS_PROFILE_DATE-OF-BIRTH-SYMBOL-TOOLTIP"
+msgstr "Date of birth"
+
+msgid "PERSON-DETAILS_PROFILE_DATE-OF-DEATH-SYMBOL-TOOLTIP"
+msgstr "Date of death"
+
+msgid "PERSON-DETAILS_FAMILY-TREE_SECTION-TITLE"
+msgstr "Family Relations"
+
+msgid "PERSON-DETAILS_FAMILY-TREE_FATHER-CAPTION"
+msgstr "Father"
+
+msgid "PERSON-DETAILS_FAMILY-TREE_MOTHER-CAPTION"
+msgstr "Mother"
+
+msgid "PERSON-DETAILS_FAMILY-TREE_PARTNER-CAPTION"
+msgstr "Partner"
+
+msgid "PERSON-DETAILS_FAMILY-TREE_CHILDREN-CAPTION"
+msgstr "Children"

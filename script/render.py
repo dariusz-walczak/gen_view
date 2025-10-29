@@ -2,6 +2,7 @@ import datetime
 import sys
 
 import jinja2
+import gettext
 
 
 # Return the year extracted from the input date string.
@@ -26,10 +27,24 @@ def _extract_year_filter(raw_date):
     return None
 
 
-def init_jinja_env(data_path):
+def init_jinja_env(data_path, locale_path=None):
+    extensions = [] if locale_path is None else ["jinja2.ext.i18n"]
+
     env = jinja2.Environment(
         optimized  = False,
         loader     = jinja2.FileSystemLoader(data_path),
+        extensions = extensions,
         autoescape = False)
     env.filters["year"] = _extract_year_filter
+
+    if locale_path is not None:
+        translations = gettext.translation(
+            domain = "messages",
+            localedir = locale_path,
+            languages = ["en"])
+        # make the `_` function and the `{% trans %}` block available in templates rendered using
+        #  this jinja2 environment:
+        env.install_gettext_translations(translations, newstyle=True)
+        translations.install() # make the `_` global function available in python code
+
     return env

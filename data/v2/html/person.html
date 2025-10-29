@@ -16,10 +16,14 @@
       {% endif %}
     </h1>
     {% if birth_date is defined %}
-    <p title="Date of Birth">* <strong>{{birth_date}}</strong></p>
+    <p title="{% trans %}PERSON-DETAILS_PROFILE_DATE-OF-BIRTH-SYMBOL-TOOLTIP{% endtrans %}">
+      * <strong>{{birth_date}}</strong>
+    </p>
     {% endif %}
     {% if death_date is defined %}
-    <p title="Date of Death">† <strong>{{death_date}}</strong></p>
+    <p title="{% trans %}PERSON-DETAILS_PROFILE_DATE-OF-DEATH-SYMBOL-TOOLTIP{% endtrans %}">
+      † <strong>{{death_date}}</strong>
+    </p>
     {% endif %}
     <!-- <p>Occupation: <strong>Farmer</strong></p> -->
     <!-- <p>Location: <strong>Springfield, USA</strong></p> -->
@@ -27,20 +31,20 @@
 </header>
 
 <section class="section family-tree">
-  <h2>Family Relations</h2>
+  <h2>{% trans %}PERSON-DETAILS_FAMILY-TREE_SECTION-TITLE{% endtrans %}</h2>
   <ul>
     {% if father is defined %}
-    <li>Father: {{ relative.person(config, father) }}</li>
+    <li>{% trans %}PERSON-DETAILS_FAMILY-TREE_FATHER-CAPTION{% endtrans %}: {{ relative.person(config, father) }}</li>
     {% endif %}
     {% if mother is defined %}
-    <li>Mother: {{ relative.person(config, mother) }}</li>
+    <li>{% trans %}PERSON-DETAILS_FAMILY-TREE_MOTHER-CAPTION{% endtrans %}: {{ relative.person(config, mother) }}</li>
     {% endif %}
     {% for partner in partners %}
-    <li>Partner: {{ relative.person(config, partner) }}</li>
+    <li>{% trans %}PERSON-DETAILS_FAMILY-TREE_PARTNER-CAPTION{% endtrans %}: {{ relative.person(config, partner) }}</li>
     {% if partner.children is defined %}
     <li>
       <ul>
-        <li>Children:</li>
+        <li>{% trans %}PERSON-DETAILS_FAMILY-TREE_CHILDREN-CAPTION{% endtrans %}:</li>
         {% for child in partner.children %}
         <li>{{ relative.person(config, child) }}</li>
         {% endfor %}

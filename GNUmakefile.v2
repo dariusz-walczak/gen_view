@@ -141,7 +141,7 @@ $(PERSON_LIST_HTML_FILE): $(PERSON_LIST_STAGE2_JSON_FILE) $(LOCALE_OUT_FILES) \
 	$(JSON2HTML) \
 		--base-dir=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_INT)) \
 		--res-dir=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_PERSON_INT)) \
-		--data-dir=$(PATH_DATA) $< persons.html > $@.tmp
+		--data-dir=$(PATH_DATA) --locale-dir=$(PATH_LOCALE_OUT) $< persons.html > $@.tmp
 	$(MV) $@.tmp $@
 
 all_list_html: $(PERSON_LIST_HTML_FILE)
@@ -198,7 +198,7 @@ $(PATH_PERSON_OUT)/%.html: $(PATH_PERSON_INT)/%.json $(LOCALE_OUT_FILES)
 	$(JSON2HTML) \
 		--base-dir=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_INT)) \
 		--res-dir=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_PERSON_INT)) \
-		--data-dir=$(PATH_DATA) $< person.html > $@.tmp
+		--data-dir=$(PATH_DATA) --locale-dir=$(PATH_LOCALE_OUT) $< person.html > $@.tmp
 	$(MV) $@.tmp $@
 
 all_person_html: $(PERSON_HTML_FILES)

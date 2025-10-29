@@ -23,6 +23,9 @@ def parse_options(args):
         "-d", "--data-dir", action="store", metavar="PATH", dest="data_path",
         help="PATH to the directory containing jinja templates")
     parser.add_argument(
+        "-l", "--locale-dir", action="store", metavar="PATH", dest="locale_path",
+        help="PATH to the locales directory")
+    parser.add_argument(
         "-v", "--doc-version", action="store", metavar="NUM", dest="doc_version",
         help="The document version NUMber")
     parser.add_argument(
@@ -47,7 +50,7 @@ def main(options):
 
     html_template_path = os.path.join(options.data_path, "html")
 
-    env = init_jinja_env(html_template_path)
+    env = init_jinja_env(html_template_path, options.locale_path)
     try:
         template = env.get_template(options.template)
     except jinja2.exceptions.TemplateNotFound as e:
