@@ -63,4 +63,15 @@
     {% endif %}
   </ul>
 </section>
+
+{% if notes %}
+<section class="section family-tree">
+  <h2>{% trans %}PERSON-DETAILS_NOTES_SECTION-TITLE{% endtrans %}</h2>
+  <ul>
+    {% for note in notes %}
+    <li>{{ render_note(note) }}</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
 {% endblock %}

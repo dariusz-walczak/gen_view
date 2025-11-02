@@ -4,6 +4,7 @@ import sys
 import jinja2
 import gettext
 
+import notes
 
 # Return the year extracted from the input date string.
 def _extract_year_filter(raw_date):
@@ -36,6 +37,7 @@ def init_jinja_env(data_path, locale_path=None):
         extensions = extensions,
         autoescape = False)
     env.filters["year"] = _extract_year_filter
+    env.globals["render_note"] = notes.render_note
 
     if locale_path is not None:
         translations = gettext.translation(
