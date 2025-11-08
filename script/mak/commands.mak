@@ -16,7 +16,3 @@ REALPATH   ?= realpath
 RM         ?= rm
 SORT       ?= sort
 XARGS      ?= xargs
-
-## === Solution Commands ======================================================================= ##
-
-JSON2HTML ?= script/json2html.py

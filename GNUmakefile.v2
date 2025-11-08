@@ -1,15 +1,24 @@
 # -*- mode: makefile-gmake -*-
 
-include script/mak/commands.mak
-
 ## === Parameters ============================================================================== ##
 
-PATH_OUT = ./out/v2
-PATH_SRC = ./src
-PATH_INT = ./int
-PATH_DATA = ./data/v2
+# Determine the parent path of the current file:
+#  1) Get the currently parsed make file name (lastword)
+#  2) Convert it to an absolute path (abspath)
+#  3) Extract the directory part (dir)
+#  4) Remove the trailing directory separator (patsubst)
+PATH_GEN_VIEW_ROOT = $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
+PATH_WORKSPACE_ROOT = $(CURDIR)
+
+PATH_OUT := $(PATH_WORKSPACE_ROOT)/out/v2
+PATH_SRC := $(PATH_WORKSPACE_ROOT)/src
+PATH_INT := $(PATH_WORKSPACE_ROOT)/int
+PATH_DATA := $(PATH_GEN_VIEW_ROOT)/data/v2
+PATH_SCRIPT := $(PATH_GEN_VIEW_ROOT)/script
 
 ## === Commands ================================================================================ ##
+
+include $(PATH_SCRIPT)/mak/commands.mak
 
 ifndef PATH_GEN_SANDBOX
     $(error The 'PATH_GEN_SANDBOX' environment variable specifying the path to the local clone \
@@ -23,7 +32,8 @@ ifeq ($(wildcard $(GEN_PERSON)),)
         repository or override the path using the 'GEN_PERSON' variable)
 endif
 
-ADAPT_PERSON_LIST ?= script/adapt_person_list.py
+ADAPT_PERSON_LIST ?= $(PATH_SCRIPT)/adapt_person_list.py
+JSON2HTML ?= $(PATH_SCRIPT)/json2html.py
 
 ## === Interface Rules ========================================================================= ##
 
