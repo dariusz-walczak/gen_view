@@ -5,7 +5,6 @@ import copy
 import datetime
 import json
 import logging
-import os.path
 import sys
 
 
@@ -92,7 +91,7 @@ def adapt_person_list(context):
                 person_map.setdefault(family_name, []).append(person)
 
         return person_map
-    
+
     family_name_map = __group_by_known_family_names(context)
 
     family_name_grouped = []
