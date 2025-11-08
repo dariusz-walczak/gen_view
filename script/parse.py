@@ -1,6 +1,6 @@
 import datetime
 import re
-import simplejson
+import json
 
 
 def parse_source(sio):
@@ -22,7 +22,7 @@ def parse_source(sio):
     if raw_part_2 is None:
         return ({}, raw_part_1)
 
-    return (simplejson.loads(raw_part_1), raw_part_2)
+    return (json.loads(raw_part_1), raw_part_2)
 
 
 def parse_date(s, default=None):
