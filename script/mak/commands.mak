@@ -15,4 +15,5 @@ READLINK   ?= readlink
 REALPATH   ?= realpath
 RM         ?= rm
 SORT       ?= sort
+TOUCH      ?= touch
 XARGS      ?= xargs

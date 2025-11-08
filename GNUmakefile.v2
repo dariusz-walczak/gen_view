@@ -7,14 +7,15 @@
 #  2) Convert it to an absolute path (abspath)
 #  3) Extract the directory part (dir)
 #  4) Remove the trailing directory separator (patsubst)
-PATH_GEN_VIEW_ROOT = $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
-PATH_WORKSPACE_ROOT = $(CURDIR)
+PATH_GEN_VIEW_ROOT := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
+PATH_WORKSPACE_ROOT := $(CURDIR)
 
 PATH_OUT := $(PATH_WORKSPACE_ROOT)/out/v2
 PATH_SRC := $(PATH_WORKSPACE_ROOT)/src
 PATH_INT := $(PATH_WORKSPACE_ROOT)/int
 PATH_DATA := $(PATH_GEN_VIEW_ROOT)/data/v2
 PATH_SCRIPT := $(PATH_GEN_VIEW_ROOT)/script
+PATH_VENV := $(PATH_GEN_VIEW_ROOT)/.venv
 
 ## === Commands ================================================================================ ##
 
@@ -32,8 +33,11 @@ ifeq ($(wildcard $(GEN_PERSON)),)
         repository or override the path using the 'GEN_PERSON' variable)
 endif
 
-ADAPT_PERSON_LIST ?= $(PATH_SCRIPT)/adapt_person_list.py
-JSON2HTML ?= $(PATH_SCRIPT)/json2html.py
+PYTHON := $(PATH_VENV)/bin/python
+PIP := $(PATH_VENV)/bin/pip
+
+ADAPT_PERSON_LIST ?= $(PYTHON) $(PATH_SCRIPT)/adapt_person_list.py
+JSON2HTML ?= $(PYTHON) $(PATH_SCRIPT)/json2html.py
 
 ## === Interface Rules ========================================================================= ##
 
@@ -49,12 +53,15 @@ JSON2HTML ?= $(PATH_SCRIPT)/json2html.py
 	clean \
 		clean_list_all \
 		clean_person_all \
+		clean_pve \
 		clean_static_data \
 	diag_list_all \
     diag_locale \
 	diag_person_all \
+	diag_pve \
 	diag_root_dirs \
-	diag_static_data
+	diag_static_data \
+	venv
 
 all: all_html all_static_data
 	@$(PRINTF) "\n${col_yellow_bold}>>>${col_off} firefox ${col_var_val}file://%s${col_off}\n\n" \
@@ -63,7 +70,7 @@ all: all_html all_static_data
 all_int: all_person_int
 all_html: all_list_html all_person_html
 
-clean: clean_list_all clean_locale clean_person_all clean_static_data
+clean: clean_list_all clean_locale clean_person_all clean_pve clean_static_data 
 
 ## === Resource Build Rules ==================================================================== ##
 
@@ -140,13 +147,13 @@ $(PERSON_LIST_STAGE1_JSON_FILE): $(PERSON_SOURCE_LIST_FILE) | $(PERSON_LIST_INT_
 	$(GEN_PERSON) --log-level=off --src-root-path=$(PATH_SRC) list > $@.tmp
 	$(MV) $@.tmp $@
 
-$(PERSON_LIST_STAGE2_JSON_FILE): $(PERSON_LIST_STAGE1_JSON_FILE) | $(PERSON_LIST_INT_DIRS)
+$(PERSON_LIST_STAGE2_JSON_FILE): $(PERSON_LIST_STAGE1_JSON_FILE) deps_pve | $(PERSON_LIST_INT_DIRS)
 	$(ADAPT_PERSON_LIST) $(PERSON_LIST_STAGE1_JSON_FILE) > $@.tmp
 	$(MV) $@.tmp $@
 
 all_list_int: $(PERSON_LIST_STAGE1_JSON_FILE) $(PERSON_LIST_STAGE2_JSON_FILE)
 
-$(PERSON_LIST_HTML_FILE): $(PERSON_LIST_STAGE2_JSON_FILE) $(LOCALE_OUT_FILES) \
+$(PERSON_LIST_HTML_FILE): $(PERSON_LIST_STAGE2_JSON_FILE) $(LOCALE_OUT_FILES) deps_pve \
 		| $(PERSON_LIST_HTML_DIR)
 	$(JSON2HTML) \
 		--base-dir=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_INT)) \
@@ -204,7 +211,7 @@ $(PATH_PERSON_INT)/%.json:
 		--person="http://$*" > $@.tmp
 	$(MV) $@.tmp $@
 
-$(PATH_PERSON_OUT)/%.html: $(PATH_PERSON_INT)/%.json $(LOCALE_OUT_FILES)
+$(PATH_PERSON_OUT)/%.html: $(PATH_PERSON_INT)/%.json $(LOCALE_OUT_FILES) deps_pve
 	$(JSON2HTML) \
 		--base-dir=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_INT)) \
 		--res-dir=$(shell $(REALPATH) --relative-to=$(dir $<) $(PATH_PERSON_INT)) \
@@ -276,3 +283,32 @@ ALL_DIRS = $(sort \
 
 $(ALL_DIRS): %:
 	$(MKDIR) -p $@
+
+## --- Python Virtual Environment -------------------------------------------------------------- ##
+
+PATH_REQS := $(PATH_GEN_VIEW_ROOT)/requirements.txt
+
+$(PATH_VENV):
+	python3 -m venv $(PATH_VENV)
+
+$(PATH_VENV)/.pip-upgraded: | $(PATH_VENV)
+	$(PYTHON) -m pip install --upgrade pip setuptools wheel
+	$(TOUCH) $@
+
+$(PATH_VENV)/.deps-ok: $(PATH_REQS) | $(PATH_VENV)/.pip-upgraded
+	$(PIP) install -r $(PATH_REQS)
+	$(TOUCH) $@
+
+deps_pve: $(PATH_VENV)/.deps-ok
+
+update_pve: | $(PATH_VENV)/.pip-upgraded
+	$(PIP) install --upgrade -r $(PATH_REQS)
+	$(TOUCH) $(VENV)/.deps-ok
+
+clean_pve:
+	$(RM) -rf $(PATH_VENV)
+
+diag_pve:
+	@$(ECHO) "${col_yellow_bold}diag_pve${col_off}:"
+	@$(ECHO) "    ${col_var_name}PATH_VENV${col_off}: "\
+		"${col_var_val}$(PATH_VENV)${col_off}"
