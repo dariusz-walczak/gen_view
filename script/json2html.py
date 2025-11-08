@@ -53,11 +53,11 @@ def main(options):
     env = init_jinja_env(html_template_path, options.locale_path)
     try:
         template = env.get_template(options.template)
-    except jinja2.exceptions.TemplateNotFound as e:
+    except jinja2.exceptions.TemplateNotFound:
         print(
             f"ERROR: The '{options.template}' template not found under the '{html_template_path}'"
             " path", file=sys.stderr)
-        return 1;
+        return 1
 
     print(template.render(context))
 
