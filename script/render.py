@@ -1,8 +1,8 @@
 import datetime
+import gettext
 import sys
 
 import jinja2
-import gettext
 
 import notes
 
@@ -46,7 +46,7 @@ def init_jinja_env(data_path, locale_path=None):
             languages = ["en"])
         # make the `_` function and the `{% trans %}` block available in templates rendered using
         #  this jinja2 environment:
-        env.install_gettext_translations(translations, newstyle=True)
+        env.install_gettext_translations(translations, newstyle=True) # pylint: disable=no-member
         translations.install() # make the `_` global function available in python code
 
     return env
