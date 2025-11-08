@@ -1,6 +1,5 @@
 import jinja2
 import markupsafe
-import os.path
 
 _note_type_lut = {
     "info": "Ⓘ",
@@ -31,20 +30,20 @@ def _render_var_val(full_ctx, val_ctx):
 
     if render_cb is None:
         # OWL-101: Proper error handling needed
-        raise Exception(f"Invalid note value type: {val_ctx['type']}")
+        raise ValueError(f"Invalid note value type: {val_ctx['type']}")
 
     return render_cb(full_ctx, val_ctx["value"])
 
 
 @jinja2.pass_context
 def render_note(full_ctx, note_ctx) -> markupsafe.Markup:
-    type = _note_type_lut.get(note_ctx["type"], "")
+    note_type = _note_type_lut.get(note_ctx["type"], "")
 
-    if type is None:
+    if note_type is None:
         # OWL-101: Proper error handling needed
-        raise Exception(f"Invalid note type: {note_ctx['type']}")
+        raise ValueError(f"Invalid note type: {note_ctx['type']}")
 
-    msg_fmt = type + " " + _(f"GEN-PERSON-NOTE_{note_ctx['id']}")
+    msg_fmt = note_type + " " + _(f"GEN-PERSON-NOTE_{note_ctx['id']}")
 
     rendered_vars = {
         name: _render_var_val(full_ctx, val_ctx)
