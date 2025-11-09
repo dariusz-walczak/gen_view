@@ -65,11 +65,11 @@
 </section>
 
 {% if notes %}
-<section class="section family-tree">
+<section class="section person-notes">
   <h2>{% trans %}PERSON-DETAILS_NOTES_SECTION-TITLE{% endtrans %}</h2>
-  <ul>
+  <ul class="person-notes__list">
     {% for note in notes %}
-    <li>{{ render_note(note) }}</li>
+    <li class="person-notes__item">{{ render_note(note) }}</li>
     {% endfor %}
   </ul>
 </section>
