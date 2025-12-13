@@ -13,10 +13,16 @@ def _render_resource(full_ctx, res_ctx):
 
     return markupsafe.Markup(template.render(ctx))
 
+
+def _render_sequence(full_ctx, res_ctx):
+    return markupsafe.Markup(
+        ", ".join([_render_var_val(full_ctx, var_ctx) for var_ctx in res_ctx]))
+
 _value_type_render_cb_lut = {
     "integer": lambda _, val: val,
     "string": lambda _, val: val,
-    "resource": _render_resource
+    "resource": _render_resource,
+    "sequence": _render_sequence
 }
 
 

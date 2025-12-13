@@ -8,6 +8,12 @@ msgstr ""
 msgid "GEN-PERSON-NOTE_INFERRED_PARTNER"
 msgstr "{partner} is an inferred partner. Add a `gx:Relationship` resource of type `gx:Couple` to define the partners explicitly."
 
+msgid "GEN-PERSON-NOTE_MULTIPLE_FATHERS"
+msgstr "Multiple fathers found: {fathers}"
+
+msgid "GEN-PERSON-NOTE_MULTIPLE_MOTHERS"
+msgstr "Multiple mothers found: {mothers}"
+
 msgid "PERSON-DETAILS_PROFILE_DATE-OF-BIRTH-SYMBOL-TOOLTIP"
 msgstr "Date of birth"
 
