@@ -136,6 +136,8 @@ PERSON_LIST_INT_DIRS := \
 		$(PERSON_LIST_STAGE2_JSON_FILE)))
 PERSON_LIST_HTML_DIR := $(dir $(PERSON_LIST_HTML_FILE))
 
+.PHONY: $(PERSON_SOURCE_LIST_FILE)
+
 # Generate the file including all the source turtle file paths, so that dependencies will be
 #  regenerated not only when a source file is added or modified but also when it is deleted:
 $(PERSON_SOURCE_LIST_FILE): | $(PERSON_LIST_INT_DIRS)
