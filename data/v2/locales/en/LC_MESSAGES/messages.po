@@ -5,14 +5,21 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+
 msgid "GEN-PERSON-NOTE_INFERRED_PARTNER"
 msgstr "{partner} is an inferred partner. Add a `gx:Relationship` resource of type `gx:Couple` to define the partners explicitly."
+
+msgid "GEN-PERSON-NOTE_INVALID_GENDER"
+msgstr "The person gender is specified in the RDF data but its value is invalid"
 
 msgid "GEN-PERSON-NOTE_MULTIPLE_FATHERS"
 msgstr "Multiple fathers found: {fathers}"
 
 msgid "GEN-PERSON-NOTE_MULTIPLE_MOTHERS"
 msgstr "Multiple mothers found: {mothers}"
+
+msgid "GEN-PERSON-NOTE_UNSPECIFIED_GENDER"
+msgstr "The person gender is not specified in the RDF data"
 
 msgid "PERSON-DETAILS_PROFILE_DATE-OF-BIRTH-SYMBOL-TOOLTIP"
 msgstr "Date of birth"
