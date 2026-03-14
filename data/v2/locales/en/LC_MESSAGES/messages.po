@@ -23,6 +23,12 @@ msgstr "Multiple fathers found: {fathers}"
 msgid "GEN-PERSON-NOTE_MULTIPLE_MOTHERS"
 msgstr "Multiple mothers found: {mothers}"
 
+msgid "GEN-PERSON-NOTE_STUBBED_PARENT"
+msgstr "{parent} is a stubbed resource"
+
+msgid "GEN-PERSON-NOTE_STUBBED_PROBAND"
+msgstr "{proband} is a stubbed resource"
+
 msgid "GEN-PERSON-NOTE_UNSPECIFIED_GENDER"
 msgstr "The person gender is not specified in the RDF data"
 
