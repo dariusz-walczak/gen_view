@@ -1,1 +1,7 @@
-<a href="{{ config.path.res }}/{{ res.unique_path }}.html">{{ res.caption }}</a>
+<a href="{{ config.path.res }}/{{ res.unique_path }}.html">
+{% if res.caption %}
+{{ res.caption }}
+{% else %}
+{{ res.unique_path }}
+{% endif %}
+</a>
