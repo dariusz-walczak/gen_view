@@ -36,10 +36,10 @@ msgid "GEN-PERSON-NOTE_MULTIPLE_MOTHERS"
 msgstr "Multiple mothers found: {mothers}"
 
 msgid "GEN-PERSON-NOTE_STUBBED_PARENT"
-msgstr "{parent} is a stubbed resource"
+msgstr "The {parent} (parent) resource is stubbed"
 
 msgid "GEN-PERSON-NOTE_STUBBED_PROBAND"
-msgstr "{proband} is a stubbed resource"
+msgstr "The proband resource is stubbed"
 
 msgid "GEN-PERSON-NOTE_UNTYPED_PARENT"
 msgstr "The {parent} (parent) resource type is not specified"
