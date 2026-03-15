@@ -25,7 +25,7 @@
   {% for person in group.persons %}
   <ul class="person-list">
     <li class="person-item">
-      {% if person.gender == "female" %}♀{% else %}♂{% endif %}
+      {% if person.gender == "female" %}♀{% elif person.gender == "male" %}♂{% else %}○{% endif %}
       <a href="{{config.path.res}}/{{person.unique_path}}.html">{{person.name.full}}</a>
       {% if 'birth_year' in person or 'death_year' in person %}
       <span class="years">
